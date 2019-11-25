@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, memo} from 'react';
 import {
   View,
   Text,
@@ -24,17 +24,34 @@ const SearchSection = ({selectedCountries}) => {
     </View>
   );
 };
-const Country = ({name, flag, isSelected, onPressCountry}) => {
-  const onPress = () => onPressCountry(name);
-  const selectedColor = isSelected ? 'purple' : 'white';
+
+const Flag = ({flag, name}) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.countryItemContainer}>
+    <>
       <View style={styles.flag}>
         <SvgUri width="40" height="30" uri={flag} />
       </View>
       <View style={styles.countryNameContainer}>
         <Text>{name}</Text>
       </View>
+    </>
+  );
+};
+const MemoizedFlag = memo(Flag, (prevProps, nextProps) => {
+  if (prevProps.name === nextProps.name) {
+    return true;
+  }
+  return false;
+});
+const Country = ({name, flag, isSelected, onPressCountry}) => {
+  const onPress = () => onPressCountry(name);
+  const selectedColor = isSelected ? 'purple' : 'white';
+  return (
+    <TouchableOpacity
+      key={name}
+      onPress={onPress}
+      style={styles.countryItemContainer}>
+      <MemoizedFlag flag={flag} name={name} />
       <View style={[styles.checked, {backgroundColor: selectedColor}]} />
     </TouchableOpacity>
   );
@@ -45,6 +62,13 @@ const _keyExtractor = ({alpha3code}) => alpha3code;
 const isCountrySelected = (selectedCountries, country) =>
   selectedCountries.map(name => name).indexOf(country);
 
+const MemoizedCountry = memo(Country, (prevProps, nextProps) => {
+  if (prevProps.isSelected === nextProps.isSelected) {
+    return true;
+  }
+  return false;
+});
+
 function AddCountry() {
   const [countries, setCountries] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState(['Afghanistan']);
@@ -52,7 +76,22 @@ function AddCountry() {
   useEffect(() => {
     fetch('https://restcountries.eu/rest/v2/all')
       .then(response => response.json())
-      .then(response => setCountries(response))
+      .then(response =>
+        setCountries(
+          response,
+          // .filter(
+          //   country =>
+          //     [
+          //       'Afghanistan',
+          //       'India',
+          //       'Canada',
+          //       'Pakistan',
+          //       'Bangladesh',
+          //     ].indexOf(country.name) >= 0,
+          // )
+          // .map(country => ({...country, isSelected: false}))
+        ),
+      )
       .catch(error => console.log(error));
   }, []);
 
@@ -69,12 +108,13 @@ function AddCountry() {
   };
 
   const _renderItem = ({item}) => (
-    <Country
+    <MemoizedCountry
       {...item}
       isSelected={isCountrySelected(selectedCountries, item.name) >= 0}
       onPressCountry={onPressCountry}
     />
   );
+
   return (
     <View>
       <SearchSection selectedCountries={selectedCountries} />
@@ -82,6 +122,7 @@ function AddCountry() {
         data={countries}
         keyExtractor={_keyExtractor}
         renderItem={_renderItem}
+        extraData={selectedCountries}
       />
     </View>
   );
