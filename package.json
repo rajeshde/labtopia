@@ -7,9 +7,11 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start-packager": "env REACT_DEBUGGER=\"$([ -d '/Applications/React Native Debugger.app' ] && echo \"open 'rndebugger://set-debugger-loc?host=localhost&port=8081' --args\")\" node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
+    "@welldone-software/why-did-you-render": "^3.3.9",
     "react": "16.9.0",
     "react-native": "0.61.4",
     "react-native-svg": "^9.13.3"

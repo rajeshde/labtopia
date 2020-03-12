@@ -7,8 +7,11 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-
 import {SvgUri} from 'react-native-svg';
+
+import whyDidYouRender from '@welldone-software/why-did-you-render';
+whyDidYouRender(React);
+AddCountry.whyDidYouRender = true;
 
 const VIEWPORT_WIDTH = Dimensions.get('window').width;
 const VIEWPORT_HEIGHT = Dimensions.get('window').height;
@@ -31,7 +34,11 @@ const Flag = ({flag, name}) => {
       <View style={styles.flag}>
         <SvgUri width="40" height="30" uri={flag} />
       </View>
-      <View style={styles.countryNameContainer}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+        }}>
         <Text>{name}</Text>
       </View>
     </>
